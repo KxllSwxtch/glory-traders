@@ -1,0 +1,35 @@
+# Python
+venv/                # Виртуальное окружение
+__pycache__/         # Кэш Python
+*.py[cod]            # Скомпилированные файлы Python
+*.sqlite3            # SQLite базы данных (если используются временно)
+*.log                # Логи
+*.env                # Переменные окружения
+
+# Node.js
+node_modules/        # Зависимости React
+build/               # Сборка React (создаётся при production-сборке)
+.DS_Store            # macOS системные файлы
+npm-debug.log*       # Логи npm
+yarn-debug.log*      # Логи Yarn
+yarn-error.log*      # Ошибки Yarn
+
+# Docker
+docker-compose.override.yml  # Локальные переопределения Docker
+*.pid                        # PID-файлы
+
+# PostgreSQL
+pgdata/              # Если база данных настроена локально в Docker
+
+# IDE/Editor-specific
+.idea/               # Конфигурация PyCharm/IntelliJ
+.vscode/             # Конфигурация Visual Studio Code
+*.swp                # Vim временные файлы
+
+# General
+*.bak                # Резервные файлы
+*.tmp                # Временные файлы
+*.out                # Файлы вывода
+
+# Elasticsearch
+esdata/              # Локальные данные Elasticsearch
