@@ -15,45 +15,46 @@ const CarListItem = ({ car }) => {
 	)
 
 	return (
-		<div className='max-w-sm bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden'>
+		<div className='bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden flex flex-col'>
 			{/* Изображение */}
 			{imageSrc ? (
 				<img
 					src={imageSrc}
 					alt={car.title}
-					className='w-3 h-3 block'
-					style={{ width: '20%' }}
+					className='w-full h-56 object-cover'
 				/>
 			) : (
-				<div className='w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500 italic'>
+				<div className='w-full h-56 bg-gray-200 flex items-center justify-center text-gray-500 italic'>
 					No image available
 				</div>
 			)}
 
 			{/* Содержимое карточки */}
-			<div className='p-4'>
-				<h2 className='text-lg font-bold text-gray-800 mb-2'>{car.title}</h2>
-				<ul className='text-sm text-gray-600 mb-4'>
+			<div className='p-6 flex-grow flex flex-col'>
+				<h2 className='text-xl font-bold text-gray-800 mb-3 text-center uppercase'>
+					{car.title}
+				</h2>
+				<ul className='text-sm text-gray-600 mb-6 space-y-1'>
 					<li>
 						<strong>Тип топлива:</strong> {fuelTypes[car.fuel_type] || 'N/A'}
 					</li>
 					<li>
-						<strong>Год выпуска:</strong> {car.year || 'N/A'}
+						<strong>Год выпуска:</strong> {car.year || 'N/A'} г.
 					</li>
 					<li>
-						<strong>Пробег:</strong> {car.lots?.odometer_km || 'N/A'} км
-					</li>
-					<li>
-						<strong>Объём двигателя:</strong> {car.lots?.engine_volume || 'N/A'}{' '}
-						л
+						<strong>Пробег:</strong>{' '}
+						{car.lots?.odometer_km.toLocaleString() || 'N/A'} км
 					</li>
 				</ul>
-				<p className='text-md font-semibold text-gray-800'>
-					Цена в Корее:{' '}
-					<span className='text-blue-500'>
+				<div className='mt-auto text-center'>
+					<p className='text-lg font-bold text-red-600'>
 						{car.lots?.original_price?.toLocaleString() || 'N/A'} ₩
-					</span>
-				</p>
+					</p>
+					{/* Кнопка */}
+					<button className='mt-4 w-full bg-red-500 text-white py-2 rounded-md font-medium hover:bg-red-600 transition'>
+						Подробнее
+					</button>
+				</div>
 			</div>
 		</div>
 	)
@@ -75,4 +76,5 @@ CarListItem.propTypes = {
 		}),
 	}),
 }
+
 export default CarListItem
