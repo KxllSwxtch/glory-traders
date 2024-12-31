@@ -1,34 +1,37 @@
+import { Link } from 'react-router-dom' // Для использования маршрутов
 import LOGO_SRC from '../assets/logo.png'
 
 const Header = () => {
 	return (
-		<header className='bg-white shadow-md py-2 fixed top-0 left-0 w-full z-50'>
+		<header className='bg-white shadow-md py-4 fixed top-0 left-0 w-full z-50'>
 			<div className='container mx-auto flex items-center justify-between px-4'>
 				{/* Логотип */}
 				<div className='flex items-center space-x-4'>
-					<img src={LOGO_SRC} alt='Mike Auto Logo' className='h-24' />
+					<Link to='/'>
+						<img src={LOGO_SRC} alt='Mike Auto Logo' className='h-24' />
+					</Link>
 				</div>
 
 				{/* Навигация */}
 				<nav className='flex items-center space-x-8'>
-					<a
-						href='#'
+					<Link
+						to='/'
 						className='text-gray-700 hover:text-gray-900 font-medium transition'
 					>
 						Главная
-					</a>
-					<a
-						href='#'
+					</Link>
+					<Link
+						to='/catalog'
 						className='text-gray-700 hover:text-gray-900 font-medium transition'
 					>
 						Каталог авто из Кореи
-					</a>
-					<a
-						href='#'
+					</Link>
+					<Link
+						to='/contacts'
 						className='text-gray-700 hover:text-gray-900 font-medium transition'
 					>
 						Контакты
-					</a>
+					</Link>
 				</nav>
 
 				{/* Контакты и кнопка */}
@@ -77,12 +80,12 @@ const Header = () => {
 					<div className='text-gray-700 font-medium'>+7 (993) 600-91-12</div>
 
 					{/* Кнопка */}
-					<a
-						href='#'
+					<Link
+						to='/contacts'
 						className='bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 transition'
 					>
 						Оставить заявку
-					</a>
+					</Link>
 				</div>
 			</div>
 		</header>

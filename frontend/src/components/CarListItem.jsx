@@ -15,7 +15,7 @@ const CarListItem = ({ car }) => {
 	)
 
 	return (
-		<div className='bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden flex flex-col'>
+		<div className='bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden flex flex-col justify-between w-full'>
 			{/* Изображение */}
 			{imageSrc ? (
 				<img

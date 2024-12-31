@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { fetchCars } from '../api/carAPI.js' // API для получения данных
 import CarListItem from './CarListItem' // Компонент для отображения одной машины
+import Loader from './Loader.jsx'
 
 const CarList = () => {
 	const [cars, setCars] = useState([]) // Список машин
@@ -39,10 +40,10 @@ const CarList = () => {
 	}
 
 	return (
-		<div className='p-4'>
+		<>
 			{error && <p className='text-red-500'>Error: {error}</p>}
 
-			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'>
 				{/* Сортировка и отображение машин */}
 				{cars
 					.sort((a, b) => (a.year > b.year ? -1 : 1)) // Сортировка по году (от нового к старому)
@@ -52,7 +53,7 @@ const CarList = () => {
 			</div>
 
 			{/* Загрузка */}
-			{loading && <p>Loading...</p>}
+			{loading && <Loader />}
 
 			{/* Кнопка "Load More" */}
 			{!loading && hasMore && (
@@ -66,7 +67,7 @@ const CarList = () => {
 
 			{/* Сообщение, если данные закончились */}
 			{!hasMore && <p className='text-gray-500 mt-4'>No more cars to load.</p>}
-		</div>
+		</>
 	)
 }
 
