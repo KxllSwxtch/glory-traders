@@ -9,13 +9,13 @@ function App() {
 
 			<div className='flex flex-col min-h-screen'>
 				<Header />
-				<main className='pt-[64px] md:pt-[80px]'>
-					<div className='containermx-auto'>
+				<main className='flex-grow pt-[64px] md:pt-[80px]'>
+					<div className='mx-auto'>
 						<Routes>
 							<Route path='/' element={<Home />} />
 							<Route path='/catalog' element={<Catalog />} />
 							<Route path='/contacts' element={<Contacts />} />
-							<Route path='/car/:id' element={<CarDetails />} />
+							<Route path='/cars/:id' element={<CarDetails />} />
 						</Routes>
 					</div>
 				</main>

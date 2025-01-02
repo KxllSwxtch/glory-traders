@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
 const CarListItem = ({ car }) => {
@@ -15,13 +16,13 @@ const CarListItem = ({ car }) => {
 	)
 
 	return (
-		<div className='bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden flex flex-col justify-between w-full'>
+		<div className='bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden flex flex-col justify-between w-full max-w-[300px] md:max-w-[400px] mx-auto'>
 			{/* Изображение */}
 			{imageSrc ? (
 				<img
 					src={imageSrc}
 					alt={car.title}
-					className='w-full h-56 object-cover'
+					className='w-full h-50 object-cover'
 				/>
 			) : (
 				<div className='w-full h-56 bg-gray-200 flex items-center justify-center text-gray-500 italic'>
@@ -50,31 +51,26 @@ const CarListItem = ({ car }) => {
 					<p className='text-lg font-bold text-red-600'>
 						{car.lots?.original_price?.toLocaleString() || 'N/A'} ₩
 					</p>
-					{/* Кнопка */}
-					<button className='mt-4 w-full bg-red-500 text-white py-2 rounded-md font-medium hover:bg-red-600 transition'>
+					{/* Ссылка с передачей данных */}
+					<Link
+						to={{
+							pathname: `/cars/${car.id}`,
+							state: { car }, // Передача данных через state
+						}}
+						className='mt-4 block bg-red-500 text-white py-2 rounded-md font-medium hover:bg-red-600 transition'
+						target='_blank'
+						rel='noopener noreferrer'
+					>
 						Подробнее
-					</button>
+					</Link>
 				</div>
 			</div>
 		</div>
 	)
 }
 
-// Валидация пропсов
 CarListItem.propTypes = {
-	car: PropTypes.shape({
-		title: PropTypes.string.isRequired,
-		year: PropTypes.number,
-		fuel_type: PropTypes.string,
-		images: PropTypes.shape({
-			images_original_big: PropTypes.arrayOf(PropTypes.string),
-		}),
-		lots: PropTypes.shape({
-			odometer_km: PropTypes.number,
-			engine_volume: PropTypes.number,
-			original_price: PropTypes.number,
-		}),
-	}),
+	car: PropTypes.object.isRequired,
 }
 
 export default CarListItem

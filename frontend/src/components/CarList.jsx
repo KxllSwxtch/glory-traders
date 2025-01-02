@@ -1,60 +1,43 @@
-import { useState, useEffect } from 'react'
-import { fetchCars } from '../api/carAPI'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchCarsAsync, setCurrentPage } from '../redux/slices/carsSlice'
 import CarListItem from './CarListItem'
 import Pagination from './Pagination'
+import Loader from './Loader'
 
 const CarList = () => {
-	const [cars, setCars] = useState([]) // Данные автомобилей
-	const [currentPage, setCurrentPage] = useState(
-		() => Number(localStorage.getItem('currentPage')) || 1, // Получаем страницу из localStorage
-	) // Текущая страница
-	const [totalPages, setTotalPages] = useState(0) // Общее количество страниц
-	const [loading, setLoading] = useState(false) // Индикатор загрузки
-	const [error, setError] = useState(null) // Ошибки
+	const dispatch = useDispatch()
+	const { cars, currentPage, totalPages, loading, error } = useSelector(
+		(state) => state.cars,
+	)
 
+	// Загружаем автомобили при изменении текущей страницы
 	useEffect(() => {
-		const loadCars = async () => {
-			try {
-				setLoading(true)
-				setCars([]) // Очистка списка автомобилей перед загрузкой новых данных
-				const data = await fetchCars(currentPage)
-				setCars(data?.data)
-				setTotalPages(data.pageCount)
-			} catch (err) {
-				setError(err.message)
-			} finally {
-				setLoading(false)
-			}
-		}
+		dispatch(fetchCarsAsync(currentPage))
+	}, [dispatch, currentPage])
 
-		loadCars()
-	}, [currentPage])
-
-	// Сохранение текущей страницы в localStorage
-	useEffect(() => {
-		localStorage.setItem('currentPage', currentPage)
-	}, [currentPage])
-
-	// Переход на страницу
+	// Обработчик изменения страницы
 	const handlePageChange = (page) => {
 		if (page > 0 && page <= totalPages) {
-			setCurrentPage(page)
-			window.scrollTo({ top: 0, behavior: 'smooth' }) // Скролл к верху страницы
+			dispatch(setCurrentPage(page)) // Обновляем текущую страницу в Redux
+			window.scrollTo({ top: 0, behavior: 'smooth' }) // Скроллим наверх страницы
 		}
 	}
 
 	return (
 		<div className='p-4'>
+			{/* Ошибка */}
 			{error && <p className='text-red-500'>Ошибка: {error}</p>}
 
 			{/* Список автомобилей */}
-			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-				{cars?.map((car, index) => (
-					<CarListItem key={index} car={car} />
+			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
+				{cars.map((car) => (
+					<CarListItem key={car.id} car={car} />
 				))}
 			</div>
 
-			{loading && <p className='text-gray-500 text-center mt-4'>Загрузка...</p>}
+			{/* Индикатор загрузки */}
+			{loading && <Loader />}
 
 			{/* Пагинация */}
 			{!loading && totalPages > 1 && (

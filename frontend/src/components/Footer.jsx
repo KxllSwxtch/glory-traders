@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom' // Добавляем Link
 import LOGO_SRC from '../assets/logo.png'
 
 const Footer = () => {
@@ -7,11 +8,7 @@ const Footer = () => {
 				<div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
 					{/* Логотип */}
 					<div>
-						<img
-							src={LOGO_SRC} // Замените на реальный путь к логотипу
-							alt='Mike Auto Logo'
-							className='h-12 mb-4'
-						/>
+						<img src={LOGO_SRC} alt='Mike Auto Logo' className='h-12 mb-4' />
 					</div>
 
 					{/* Информация */}
@@ -19,28 +16,28 @@ const Footer = () => {
 						<h4 className='text-lg font-semibold mb-4'>Информация</h4>
 						<ul className='space-y-2'>
 							<li>
-								<a
-									href='#'
+								<Link
+									to='/catalog'
 									className='text-gray-300 hover:text-white transition'
 								>
 									Каталог авто из Кореи
-								</a>
+								</Link>
 							</li>
 							<li>
-								<a
-									href='#'
+								<Link
+									to='/contacts'
 									className='text-gray-300 hover:text-white transition'
 								>
 									Контакты
-								</a>
+								</Link>
 							</li>
 							<li>
-								<a
-									href='#'
+								<Link
+									to='/privacy-policy'
 									className='text-gray-300 hover:text-white transition'
 								>
 									Политика конфиденциальности
-								</a>
+								</Link>
 							</li>
 						</ul>
 					</div>
