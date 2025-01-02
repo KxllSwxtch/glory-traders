@@ -5,6 +5,7 @@ import HeroSection from './HeroSection'
 import OrderProcessSection from './OrderProcessSection'
 import SocialMediaSection from './SocialMediaSection'
 import AdvantagesSection from './AdvantagesSection'
+import ScrollToTop from './ScrollToTop'
 export {
 	CarList,
 	Header,
@@ -13,4 +14,5 @@ export {
 	OrderProcessSection,
 	SocialMediaSection,
 	AdvantagesSection,
+	ScrollToTop,
 }

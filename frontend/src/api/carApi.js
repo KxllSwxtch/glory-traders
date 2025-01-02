@@ -5,7 +5,7 @@ export const fetchCars = async (page) => {
 		const response = await fetch(`${BASE_URL}?page=${page}`)
 		const data = await response.json()
 
-		return data?.data || []
+		return data
 	} catch (error) {
 		console.error('Error fetching cars:', error)
 		throw error

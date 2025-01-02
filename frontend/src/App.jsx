@@ -1,14 +1,16 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { Header, Footer } from './components'
+import { Header, Footer, ScrollToTop } from './components'
 import { Home, Catalog, Contacts, CarDetails } from './pages'
 
 function App() {
 	return (
 		<Router>
+			<ScrollToTop />
+
 			<div className='flex flex-col min-h-screen'>
 				<Header />
-				<main className='pt-32 flex-grow'>
-					<div className='mx-auto'>
+				<main className='pt-[64px] md:pt-[80px]'>
+					<div className='containermx-auto'>
 						<Routes>
 							<Route path='/' element={<Home />} />
 							<Route path='/catalog' element={<Catalog />} />

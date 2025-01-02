@@ -1,27 +1,25 @@
 import { useState, useEffect } from 'react'
-import { fetchCars } from '../api/carAPI.js' // API для получения данных
-import CarListItem from './CarListItem' // Компонент для отображения одной машины
-import Loader from './Loader.jsx'
+import { fetchCars } from '../api/carAPI'
+import CarListItem from './CarListItem'
+import Pagination from './Pagination'
 
 const CarList = () => {
-	const [cars, setCars] = useState([]) // Список машин
-	const [page, setPage] = useState(1) // Текущая страница
-	const [loading, setLoading] = useState(false) // Статус загрузки
+	const [cars, setCars] = useState([]) // Данные автомобилей
+	const [currentPage, setCurrentPage] = useState(
+		() => Number(localStorage.getItem('currentPage')) || 1, // Получаем страницу из localStorage
+	) // Текущая страница
+	const [totalPages, setTotalPages] = useState(0) // Общее количество страниц
+	const [loading, setLoading] = useState(false) // Индикатор загрузки
 	const [error, setError] = useState(null) // Ошибки
-	const [hasMore, setHasMore] = useState(true) // Проверка, есть ли ещё данные
 
-	// Загрузка данных
 	useEffect(() => {
 		const loadCars = async () => {
 			try {
 				setLoading(true)
-				const data = await fetchCars(page) // Получение данных с текущей страницы
-				if (data.length === 0) {
-					// Если данных больше нет, отключаем пагинацию
-					setHasMore(false)
-				} else {
-					setCars((prevCars) => [...prevCars, ...data]) // Добавляем новые машины
-				}
+				setCars([]) // Очистка списка автомобилей перед загрузкой новых данных
+				const data = await fetchCars(currentPage)
+				setCars(data?.data)
+				setTotalPages(data.pageCount)
 			} catch (err) {
 				setError(err.message)
 			} finally {
@@ -30,44 +28,45 @@ const CarList = () => {
 		}
 
 		loadCars()
-	}, [page]) // Вызывается при изменении страницы
+	}, [currentPage])
 
-	// Функция для загрузки следующей страницы
-	const loadMore = () => {
-		if (!loading && hasMore) {
-			setPage((prevPage) => prevPage + 1)
+	// Сохранение текущей страницы в localStorage
+	useEffect(() => {
+		localStorage.setItem('currentPage', currentPage)
+	}, [currentPage])
+
+	// Переход на страницу
+	const handlePageChange = (page) => {
+		if (page > 0 && page <= totalPages) {
+			setCurrentPage(page)
+			window.scrollTo({ top: 0, behavior: 'smooth' }) // Скролл к верху страницы
 		}
 	}
 
 	return (
-		<>
-			{error && <p className='text-red-500'>Error: {error}</p>}
+		<div className='p-4'>
+			{error && <p className='text-red-500'>Ошибка: {error}</p>}
 
-			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'>
-				{/* Сортировка и отображение машин */}
-				{cars
-					.sort((a, b) => (a.year > b.year ? -1 : 1)) // Сортировка по году (от нового к старому)
-					.map((car, index) => (
-						<CarListItem key={index} car={car} />
-					))}
+			{/* Список автомобилей */}
+			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+				{cars?.map((car, index) => (
+					<CarListItem key={index} car={car} />
+				))}
 			</div>
 
-			{/* Загрузка */}
-			{loading && <Loader />}
+			{loading && <p className='text-gray-500 text-center mt-4'>Загрузка...</p>}
 
-			{/* Кнопка "Load More" */}
-			{!loading && hasMore && (
-				<button
-					onClick={loadMore}
-					className='bg-blue-500 text-white px-4 py-2 mt-4 rounded hover:bg-blue-700'
-				>
-					Load More
-				</button>
+			{/* Пагинация */}
+			{!loading && totalPages > 1 && (
+				<div className='flex justify-center items-center space-x-2 mt-6'>
+					<Pagination
+						currentPage={currentPage}
+						totalPages={totalPages}
+						onPageChange={handlePageChange}
+					/>
+				</div>
 			)}
-
-			{/* Сообщение, если данные закончились */}
-			{!hasMore && <p className='text-gray-500 mt-4'>No more cars to load.</p>}
-		</>
+		</div>
 	)
 }
 
