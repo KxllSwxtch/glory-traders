@@ -9,6 +9,7 @@ const HeroSection = () => {
 				className='absolute inset-0 w-full h-full object-cover'
 				src={HEROVIDEO_SRC}
 				autoPlay
+				playsInline
 				loop
 				muted
 			></video>
