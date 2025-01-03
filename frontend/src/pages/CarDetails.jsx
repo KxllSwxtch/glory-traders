@@ -16,17 +16,17 @@ const CarDetails = () => {
 
 	const car = cars.find((car) => car.id === Number(id) || car.id === id)
 
-	const [currentImageIndex, setCurrentImageIndex] = useState(1)
+	const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
 	useEffect(() => {
 		if (!car) {
-			dispatch(fetchCarsAsync(currentPage))
+			dispatch(fetchCarsAsync({ page: currentPage || 1, filters: {} }))
 		}
 	}, [car, dispatch, currentPage])
 
 	useEffect(() => {
 		if (car && car.images?.images_original_big?.length > 1) {
-			setCurrentImageIndex(1)
+			setCurrentImageIndex(0)
 		}
 	}, [car])
 

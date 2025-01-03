@@ -4,9 +4,9 @@ import { fetchCars } from '../../api/carAPI'
 // Асинхронный thunk для загрузки автомобилей
 export const fetchCarsAsync = createAsyncThunk(
 	'cars/fetchCars',
-	async (page, { rejectWithValue }) => {
+	async ({ page, filters }, { rejectWithValue }) => {
 		try {
-			const data = await fetchCars(page)
+			const data = await fetchCars(page, filters)
 			return data
 		} catch (error) {
 			return rejectWithValue(error.message)
@@ -19,6 +19,7 @@ const carsSlice = createSlice({
 	initialState: {
 		cars: [],
 		currentPage: Number(localStorage.getItem('currentPage')) || 1,
+		filters: {},
 		totalPages: 0,
 		loading: false,
 		error: null,
@@ -27,6 +28,9 @@ const carsSlice = createSlice({
 		setCurrentPage(state, action) {
 			state.currentPage = action.payload
 			localStorage.setItem('currentPage', action.payload)
+		},
+		setFilters(state, action) {
+			state.filters = action.payload // Обновление фильтров
 		},
 	},
 	extraReducers: (builder) => {
@@ -50,6 +54,6 @@ const carsSlice = createSlice({
 	},
 })
 
-export const { setCurrentPage } = carsSlice.actions
+export const { setCurrentPage, setFilters } = carsSlice.actions
 
 export default carsSlice.reducer

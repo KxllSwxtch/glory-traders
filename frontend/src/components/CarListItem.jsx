@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
 const CarListItem = ({ car }) => {
@@ -14,6 +14,9 @@ const CarListItem = ({ car }) => {
 	const imageSrc = car.images?.images_original_big?.find((img) =>
 		img.includes('_001'),
 	)
+
+	// Получаем текущий queryParams из URL
+	const location = useLocation()
 
 	return (
 		<div className='bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden flex flex-col justify-between w-full max-w-[300px] md:max-w-[400px] mx-auto'>
@@ -51,15 +54,13 @@ const CarListItem = ({ car }) => {
 					<p className='text-lg font-bold text-red-600'>
 						{car.lots?.original_price?.toLocaleString() || 'N/A'} ₩
 					</p>
-					{/* Ссылка с передачей данных */}
+					{/* Ссылка с передачей queryParams */}
 					<Link
 						to={{
 							pathname: `/cars/${car.id}`,
-							state: { car }, // Передача данных через state
+							search: location.search, // Передаём queryParams
 						}}
 						className='mt-4 block bg-red-500 text-white py-2 rounded-md font-medium hover:bg-red-600 transition'
-						target='_blank'
-						rel='noopener noreferrer'
 					>
 						Подробнее
 					</Link>

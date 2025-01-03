@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchCarsAsync } from '../redux/slices/carsSlice'
+import { fetchCarsAsync, setFilters } from '../redux/slices/carsSlice'
 import CarListItem from './CarListItem'
 import Pagination from './Pagination'
+import Loader from './Loader'
 
 const brands = [
 	{ id: 8, name: 'Aston Martin' },
@@ -74,216 +75,274 @@ const CarList = () => {
 		(state) => state.cars,
 	)
 
-	const [filters, setFilters] = useState({
-		brandId: '', // ID марки
-		model: '',
-		color: '',
-		fuelType: '',
-		minYear: '',
-		maxYear: '',
-		minMileage: '',
-		maxMileage: '',
+	const [filters, setFiltersState] = useState({
+		manufacturerId: '',
+		modelId: '',
+		generationId: '',
+		colorId: '',
+		fuelId: '',
+		transmissionId: '',
+		mountOneId: '',
+		mountTwoId: '',
+		yearOneId: '',
+		yearTwoId: '',
+		mileageOneId: '',
+		mileageTwoId: '',
 	})
 
-	const [brandSearch, setBrandSearch] = useState('') // Для поиска по названию марки
-	const [showBrands, setShowBrands] = useState(false) // Контроль отображения списка марок
-	const dropdownRef = useRef(null) // Ссылка на выпадающий список
+	const [availableModels, setAvailableModels] = useState([])
+	const [availableGenerations, setAvailableGenerations] = useState([])
+	const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
-	// Загрузка автомобилей
 	useEffect(() => {
-		dispatch(fetchCarsAsync(currentPage))
-	}, [dispatch, currentPage])
+		if (filters.manufacturerId) {
+			// Fetch models dynamically based on manufacturerId
+			// Example:
+			setAvailableModels([
+				{ id: '1', name: 'Model 1' },
+				{ id: '2', name: 'Model 2' },
+			])
+		} else {
+			setAvailableModels([])
+		}
+	}, [filters.manufacturerId])
 
-	// Закрытие списка марок по клавише ESC
 	useEffect(() => {
-		const handleKeyDown = (e) => {
-			if (e.key === 'Escape') {
-				setShowBrands(false)
-			}
+		if (filters.modelId) {
+			// Fetch generations dynamically based on modelId
+			setAvailableGenerations([
+				{ id: '1', name: 'Generation 1' },
+				{ id: '2', name: 'Generation 2' },
+			])
+		} else {
+			setAvailableGenerations([])
 		}
-		window.addEventListener('keydown', handleKeyDown)
-		return () => {
-			window.removeEventListener('keydown', handleKeyDown)
-		}
-	}, [])
+	}, [filters.modelId])
 
-	// Закрытие списка марок при клике вне области
 	useEffect(() => {
-		const handleClickOutside = (e) => {
-			if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-				setShowBrands(false)
-			}
+		const queryParams = {
+			page: currentPage,
+			filters: {
+				...Object.fromEntries(
+					Object.entries(filters).filter(([_, value]) => value !== ''),
+				),
+			},
 		}
-		document.addEventListener('mousedown', handleClickOutside)
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside)
-		}
-	}, [])
 
-	// Фильтрация автомобилей
-	const filteredCars = cars.filter((car) => {
-		return (
-			(!filters.brandId || car.brand_id === parseInt(filters.brandId)) &&
-			(!filters.model ||
-				car.model?.toLowerCase().includes(filters.model.toLowerCase())) &&
-			(!filters.color ||
-				car.color?.toLowerCase().includes(filters.color.toLowerCase())) &&
-			(!filters.fuelType || car.fuel_type === filters.fuelType) &&
-			(!filters.minYear || car.year >= parseInt(filters.minYear)) &&
-			(!filters.maxYear || car.year <= parseInt(filters.maxYear)) &&
-			(!filters.minMileage ||
-				car.lots?.odometer_km >= parseInt(filters.minMileage)) &&
-			(!filters.maxMileage ||
-				car.lots?.odometer_km <= parseInt(filters.maxMileage))
-		)
-	})
+		dispatch(fetchCarsAsync(queryParams))
+	}, [filters, currentPage, dispatch])
 
-	// Обработчик изменения фильтров
 	const handleFilterChange = (e) => {
 		const { name, value } = e.target
-		setFilters((prevFilters) => ({
-			...prevFilters,
+		const updatedFilters = {
+			...filters,
 			[name]: value,
-		}))
+		}
+		setFiltersState(updatedFilters)
+		dispatch(setFilters(updatedFilters))
+	}
+
+	const resetFilters = () => {
+		const initialFilters = {
+			manufacturerId: '',
+			modelId: '',
+			generationId: '',
+			colorId: '',
+			fuelId: '',
+			transmissionId: '',
+			mountOneId: '',
+			mountTwoId: '',
+			yearOneId: '',
+			yearTwoId: '',
+			mileageOneId: '',
+			mileageTwoId: '',
+		}
+		setFiltersState(initialFilters)
+		setAvailableModels([])
+		setAvailableGenerations([])
+		dispatch(setFilters(initialFilters))
 	}
 
 	return (
-		<div className='container mx-auto flex'>
+		<div className='container mx-auto flex flex-col lg:flex-row'>
+			{/* Кнопка для мобильных устройств */}
+			<div className='lg:hidden mb-4'>
+				<button
+					className='bg-red-500 text-white p-2 rounded'
+					onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+				>
+					{isFiltersOpen ? 'Скрыть фильтры' : 'Показать фильтры'}
+				</button>
+			</div>
+
 			{/* Фильтры */}
-			<div className='w-1/4 p-4 border-r'>
-				<h2 className='text-lg font-bold mb-4 text-red-500'>Фильтры</h2>
-				<div className='grid grid-cols-1 gap-4'>
-					<div className='relative' ref={dropdownRef}>
+			<div
+				className={`transition-all duration-300 lg:w-1/4 lg:block ${
+					isFiltersOpen ? 'max-h-screen' : 'max-h-0 overflow-hidden'
+				} lg:max-h-none lg:border-r lg:pr-4`}
+			>
+				<div className='p-4 border rounded-lg bg-gray-100 lg:bg-white lg:border-0'>
+					<h2 className='text-lg font-bold mb-4'>Фильтры</h2>
+					<div className='grid grid-cols-1 gap-4'>
+						<select
+							name='manufacturerId'
+							value={filters.manufacturerId}
+							onChange={handleFilterChange}
+							className='p-2 border rounded'
+						>
+							<option value=''>Выберите марку</option>
+							{brands.map((brand) => (
+								<option key={brand.id} value={brand.id}>
+									{brand.name}
+								</option>
+							))}
+						</select>
+
+						<select
+							name='modelId'
+							value={filters.modelId}
+							onChange={handleFilterChange}
+							className='p-2 border rounded'
+							disabled={!filters.manufacturerId}
+						>
+							<option value=''>Выберите модель</option>
+							{availableModels.map((model) => (
+								<option key={model.id} value={model.id}>
+									{model.name}
+								</option>
+							))}
+						</select>
+
+						<select
+							name='generationId'
+							value={filters.generationId}
+							onChange={handleFilterChange}
+							className='p-2 border rounded'
+							disabled={!filters.modelId}
+						>
+							<option value=''>Выберите поколение</option>
+							{availableGenerations.map((generation) => (
+								<option key={generation.id} value={generation.id}>
+									{generation.name}
+								</option>
+							))}
+						</select>
+
 						<input
 							type='text'
-							name='brand'
-							placeholder='Марка'
-							value={brandSearch}
-							onChange={(e) => setBrandSearch(e.target.value)}
-							onFocus={() => setShowBrands(true)}
-							className='p-2 border border-gray-300 rounded w-full'
+							name='colorId'
+							placeholder='Цвет'
+							value={filters.colorId}
+							onChange={handleFilterChange}
+							className='p-2 border rounded'
 						/>
-						{showBrands && (
-							<div className='absolute bg-white border border-gray-300 rounded w-full max-h-40 overflow-y-auto'>
-								{brands
-									.filter((brand) =>
-										brand.name
-											.toLowerCase()
-											.includes(brandSearch.toLowerCase()),
-									)
-									.map((brand) => (
-										<div
-											key={brand.id}
-											className='p-2 hover:bg-gray-200 cursor-pointer'
-											onClick={() => {
-												setFilters((prevFilters) => ({
-													...prevFilters,
-													brandId: brand.id,
-												}))
-												setBrandSearch(brand.name)
-												setShowBrands(false)
-											}}
-										>
-											{brand.name}
-										</div>
-									))}
-							</div>
-						)}
+
+						<select
+							name='fuelId'
+							value={filters.fuelId}
+							onChange={handleFilterChange}
+							className='p-2 border rounded'
+						>
+							<option value=''>Тип топлива</option>
+							<option value='1'>Бензин</option>
+							<option value='2'>Дизель</option>
+							<option value='3'>Электрический</option>
+						</select>
+
+						<select
+							name='transmissionId'
+							value={filters.transmissionId}
+							onChange={handleFilterChange}
+							className='p-2 border rounded'
+						>
+							<option value=''>Тип трансмиссии</option>
+							<option value='1'>Автоматическая</option>
+							<option value='2'>Механическая</option>
+						</select>
+
+						<input
+							type='number'
+							name='mountOneId'
+							placeholder='Месяц от'
+							value={filters.mountOneId}
+							onChange={handleFilterChange}
+							className='p-2 border rounded'
+						/>
+						<input
+							type='number'
+							name='mountTwoId'
+							placeholder='Месяц до'
+							value={filters.mountTwoId}
+							onChange={handleFilterChange}
+							className='p-2 border rounded'
+						/>
+
+						<input
+							type='number'
+							name='yearOneId'
+							placeholder='Год от'
+							value={filters.yearOneId}
+							onChange={handleFilterChange}
+							className='p-2 border rounded'
+						/>
+						<input
+							type='number'
+							name='yearTwoId'
+							placeholder='Год до'
+							value={filters.yearTwoId}
+							onChange={handleFilterChange}
+							className='p-2 border rounded'
+						/>
+
+						<input
+							type='number'
+							name='mileageOneId'
+							placeholder='Пробег от'
+							value={filters.mileageOneId}
+							onChange={handleFilterChange}
+							className='p-2 border rounded'
+						/>
+						<input
+							type='number'
+							name='mileageTwoId'
+							placeholder='Пробег до'
+							value={filters.mileageTwoId}
+							onChange={handleFilterChange}
+							className='p-2 border rounded'
+						/>
+
+						<button
+							onClick={resetFilters}
+							className='bg-red-500 text-white p-2 rounded hover:bg-red-600'
+						>
+							Сбросить фильтры
+						</button>
 					</div>
-					<input
-						type='text'
-						name='model'
-						placeholder='Модель'
-						value={filters.model}
-						onChange={handleFilterChange}
-						className='p-2 border border-gray-300 rounded'
-					/>
-					<input
-						type='text'
-						name='color'
-						placeholder='Цвет'
-						value={filters.color}
-						onChange={handleFilterChange}
-						className='p-2 border border-gray-300 rounded'
-					/>
-					<select
-						name='fuelType'
-						value={filters.fuelType}
-						onChange={handleFilterChange}
-						className='p-2 border border-gray-300 rounded'
-					>
-						<option value=''>Тип топлива</option>
-						<option value='gasoline'>Бензин</option>
-						<option value='diesel'>Дизель</option>
-						<option value='electric'>Электрический</option>
-						<option value='hybrid'>Гибрид</option>
-					</select>
-					<input
-						type='number'
-						name='minYear'
-						placeholder='Год от'
-						value={filters.minYear}
-						onChange={handleFilterChange}
-						className='p-2 border border-gray-300 rounded'
-					/>
-					<input
-						type='number'
-						name='maxYear'
-						placeholder='Год до'
-						value={filters.maxYear}
-						onChange={handleFilterChange}
-						className='p-2 border border-gray-300 rounded'
-					/>
-					<input
-						type='number'
-						name='minMileage'
-						placeholder='Пробег от'
-						value={filters.minMileage}
-						onChange={handleFilterChange}
-						className='p-2 border border-gray-300 rounded'
-					/>
-					<input
-						type='number'
-						name='maxMileage'
-						placeholder='Пробег до'
-						value={filters.maxMileage}
-						onChange={handleFilterChange}
-						className='p-2 border border-gray-300 rounded'
-					/>
-					<button
-						onClick={() => setFilters({})}
-						className='p-2 bg-red-500 text-white rounded hover:bg-red-600 transition'
-					>
-						Сбросить фильтры
-					</button>
 				</div>
 			</div>
 
 			{/* Список автомобилей */}
-			<div className='w-3/4 p-4'>
+			<div className='lg:w-3/4 lg:pl-4'>
 				{error && <p className='text-red-500'>Ошибка: {error}</p>}
 				<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-					{filteredCars.map((car, index) => (
+					{cars.map((car, index) => (
 						<CarListItem key={index} car={car} />
 					))}
 				</div>
-				{loading && <p className='text-center text-gray-500'>Загрузка...</p>}
-				{!loading && filteredCars.length === 0 && (
+				{loading && <Loader />}
+				{!loading && cars.length === 0 && (
 					<p className='text-center text-gray-500'>
 						Нет подходящих автомобилей.
 					</p>
 				)}
-				{/* Пагинация */}
-				{!loading && totalPages > 1 && (
-					<div className='mt-6'>
-						<Pagination
-							currentPage={currentPage}
-							totalPages={totalPages}
-							onPageChange={(page) =>
-								dispatch({ type: 'cars/setCurrentPage', payload: page })
-							}
-						/>
-					</div>
+				{totalPages > 1 && (
+					<Pagination
+						currentPage={currentPage}
+						totalPages={totalPages}
+						onPageChange={(page) =>
+							dispatch({ type: 'cars/setCurrentPage', payload: page })
+						}
+					/>
 				)}
 			</div>
 		</div>
