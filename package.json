@@ -2,6 +2,10 @@
 	"name": "glory-traders",
 	"version": "1.0.0",
 	"scripts": {
-		"start": "cd frontend && npm install && npm run build && cd ../backend && uvicorn main:app --host=0.0.0.0 --port=${PORT}"
+		"build": "vite build",
+		"start": "vite preview"
+	},
+	"devDependencies": {
+		"vite": "^6.0.7"
 	}
 }
