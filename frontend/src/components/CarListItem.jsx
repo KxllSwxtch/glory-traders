@@ -11,6 +11,11 @@ const CarListItem = ({ car }) => {
 		hydrogen: 'Водородный',
 	}
 
+	const transmissionTypes = {
+		manual: 'Механическая',
+		automatic: 'Автоматическая',
+	}
+
 	const imageSrc = car.images?.images_original_big?.find((img) =>
 		img.includes('_001'),
 	)
@@ -21,17 +26,19 @@ const CarListItem = ({ car }) => {
 	return (
 		<div className='bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden flex flex-col justify-between w-full max-w-[300px] md:max-w-[400px] mx-auto'>
 			{/* Изображение */}
-			{imageSrc ? (
-				<img
-					src={imageSrc}
-					alt={car.title}
-					className='w-full h-50 object-cover'
-				/>
-			) : (
-				<div className='w-full h-56 bg-gray-200 flex items-center justify-center text-gray-500 italic'>
-					No image available
-				</div>
-			)}
+			<div className='relative h-50 w-full'>
+				{imageSrc ? (
+					<img
+						src={imageSrc}
+						alt={car.title}
+						className='object-cover h-full w-full'
+					/>
+				) : (
+					<div className='bg-gray-200 flex items-center justify-center text-gray-500 italic h-full'>
+						No image available
+					</div>
+				)}
+			</div>
 
 			{/* Содержимое карточки */}
 			<div className='p-6 flex-grow flex flex-col'>
@@ -44,6 +51,10 @@ const CarListItem = ({ car }) => {
 					</li>
 					<li>
 						<strong>Год выпуска:</strong> {car.year || 'N/A'} г.
+					</li>
+					<li>
+						<strong>Тип Трансмиссии:</strong>{' '}
+						{transmissionTypes[car.transmission_type || 'N/A']}
 					</li>
 					<li>
 						<strong>Пробег:</strong>{' '}

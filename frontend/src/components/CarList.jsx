@@ -5,69 +5,10 @@ import CarListItem from './CarListItem'
 import Pagination from './Pagination'
 import Loader from './Loader'
 
-const brands = [
-	{ id: 8, name: 'Aston Martin' },
-	{ id: 9, name: 'Audi' },
-	{ id: 12, name: 'BAIC' },
-	{ id: 13, name: 'Bentley' },
-	{ id: 16, name: 'BMW' },
-	{ id: 21, name: 'Cadillac' },
-	{ id: 26, name: 'Chevrolet' },
-	{ id: 27, name: 'Chrysler' },
-	{ id: 28, name: 'Citroen' },
-	{ id: 33, name: 'Daewoo' },
-	{ id: 35, name: 'Daihatsu' },
-	{ id: 41, name: 'Dodge' },
-	{ id: 46, name: 'Ferrari' },
-	{ id: 47, name: 'Fiat' },
-	{ id: 48, name: 'Ford' },
-	{ id: 52, name: 'GMC' },
-	{ id: 56, name: 'Honda' },
-	{ id: 57, name: 'Hummer' },
-	{ id: 58, name: 'Hyundai' },
-	{ id: 60, name: 'Infiniti' },
-	{ id: 64, name: 'Isuzu' },
-	{ id: 67, name: 'Jaguar' },
-	{ id: 68, name: 'Jeep' },
-	{ id: 70, name: 'Kia' },
-	{ id: 72, name: 'Lamborghini' },
-	{ id: 74, name: 'Land Rover' },
-	{ id: 76, name: 'Lexus' },
-	{ id: 77, name: 'Lincoln' },
-	{ id: 78, name: 'Lotus' },
-	{ id: 83, name: 'Maserati' },
-	{ id: 84, name: 'Maybach' },
-	{ id: 85, name: 'Mazda' },
-	{ id: 86, name: 'McLaren' },
-	{ id: 88, name: 'Mercedes-Benz' },
-	{ id: 89, name: 'Mercury' },
-	{ id: 94, name: 'MINI' },
-	{ id: 95, name: 'Mitsubishi' },
-	{ id: 96, name: 'Mitsuoka' },
-	{ id: 99, name: 'Nissan' },
-	{ id: 107, name: 'Peugeot' },
-	{ id: 109, name: 'Pontiac' },
-	{ id: 110, name: 'Porsche' },
-	{ id: 118, name: 'Rolls-Royce' },
-	{ id: 121, name: 'Saab' },
-	{ id: 123, name: 'Renault Samsung' },
-	{ id: 128, name: 'Smart' },
-	{ id: 131, name: 'SsangYong' },
-	{ id: 132, name: 'Subaru' },
-	{ id: 133, name: 'Suzuki' },
-	{ id: 140, name: 'Toyota' },
-	{ id: 147, name: 'Volkswagen' },
-	{ id: 148, name: 'Volvo' },
-	{ id: 168, name: 'Foton' },
-	{ id: 169, name: 'DongFeng' },
-	{ id: 187, name: 'Tesla' },
-	{ id: 232, name: 'Genesis' },
-	{ id: 275, name: 'RAM' },
-	{ id: 279, name: 'Polestar' },
-	{ id: 500003, name: 'Joylong' },
-	{ id: 500004, name: 'Scania' },
-	{ id: 500005, name: 'SS Motors' },
-]
+// filters
+import manufacturers from '../data/manufacturers'
+import models from '../data/models'
+import colors from '../data/colors'
 
 const CarList = () => {
 	const dispatch = useDispatch()
@@ -79,7 +20,7 @@ const CarList = () => {
 		manufacturerId: '',
 		modelId: '',
 		generationId: '',
-		colorId: '',
+		colorsId: '',
 		fuelId: '',
 		transmissionId: '',
 		mountOneId: '',
@@ -94,32 +35,29 @@ const CarList = () => {
 	const [availableGenerations, setAvailableGenerations] = useState([])
 	const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
+	// Подгружаем модели на основе выбранного производителя
 	useEffect(() => {
 		if (filters.manufacturerId) {
-			// Fetch models dynamically based on manufacturerId
-			// Example:
-			setAvailableModels([
-				{ id: '1', name: 'Model 1' },
-				{ id: '2', name: 'Model 2' },
-			])
+			const modelsForBrand = models[filters.manufacturerId] || []
+			setAvailableModels(modelsForBrand)
 		} else {
 			setAvailableModels([])
 		}
 	}, [filters.manufacturerId])
 
+	// Подгружаем поколения на основе выбранной модели
 	useEffect(() => {
 		if (filters.modelId) {
-			// Fetch generations dynamically based on modelId
-			setAvailableGenerations([
-				{ id: '1', name: 'Generation 1' },
-				{ id: '2', name: 'Generation 2' },
-			])
+			const generationsForModel =
+				manufacturers[filters.modelId]?.generations || []
+			setAvailableGenerations(generationsForModel)
 		} else {
 			setAvailableGenerations([])
 		}
 	}, [filters.modelId])
 
-	useEffect(() => {
+	// Функция для отправки запроса с применёнными фильтрами
+	const applyFilters = () => {
 		const queryParams = {
 			page: currentPage,
 			filters: {
@@ -128,26 +66,25 @@ const CarList = () => {
 				),
 			},
 		}
-
 		dispatch(fetchCarsAsync(queryParams))
-	}, [filters, currentPage, dispatch])
-
-	const handleFilterChange = (e) => {
-		const { name, value } = e.target
-		const updatedFilters = {
-			...filters,
-			[name]: value,
-		}
-		setFiltersState(updatedFilters)
-		dispatch(setFilters(updatedFilters))
 	}
 
+	// Обработчик изменений фильтров
+	const handleFilterChange = (e) => {
+		const { name, value } = e.target
+		setFiltersState((prevFilters) => ({
+			...prevFilters,
+			[name]: value,
+		}))
+	}
+
+	// Сброс фильтров
 	const resetFilters = () => {
 		const initialFilters = {
 			manufacturerId: '',
 			modelId: '',
 			generationId: '',
-			colorId: '',
+			colorsId: '',
 			fuelId: '',
 			transmissionId: '',
 			mountOneId: '',
@@ -162,6 +99,9 @@ const CarList = () => {
 		setAvailableGenerations([])
 		dispatch(setFilters(initialFilters))
 	}
+
+	const currentYear = new Date().getUTCFullYear()
+	const yearTwoPlaceholder = `до ${currentYear}`
 
 	return (
 		<div className='container mx-auto flex flex-col lg:flex-row'>
@@ -184,6 +124,7 @@ const CarList = () => {
 				<div className='p-4 border rounded-lg bg-gray-100 lg:bg-white lg:border-0'>
 					<h2 className='text-lg font-bold mb-4'>Фильтры</h2>
 					<div className='grid grid-cols-1 gap-4'>
+						{/* Марка */}
 						<select
 							name='manufacturerId'
 							value={filters.manufacturerId}
@@ -191,13 +132,14 @@ const CarList = () => {
 							className='p-2 border rounded'
 						>
 							<option value=''>Выберите марку</option>
-							{brands.map((brand) => (
+							{manufacturers.map((brand) => (
 								<option key={brand.id} value={brand.id}>
 									{brand.name}
 								</option>
 							))}
 						</select>
 
+						{/* Модель */}
 						<select
 							name='modelId'
 							value={filters.modelId}
@@ -213,6 +155,7 @@ const CarList = () => {
 							))}
 						</select>
 
+						{/* Поколение */}
 						<select
 							name='generationId'
 							value={filters.generationId}
@@ -222,21 +165,31 @@ const CarList = () => {
 						>
 							<option value=''>Выберите поколение</option>
 							{availableGenerations.map((generation) => (
-								<option key={generation.id} value={generation.id}>
-									{generation.name}
+								<option
+									key={generation.GENERATIONID}
+									value={generation.GENERATIONID}
+								>
+									{generation.NAME}
 								</option>
 							))}
 						</select>
 
-						<input
-							type='text'
-							name='colorId'
-							placeholder='Цвет'
-							value={filters.colorId}
+						{/* Цвет */}
+						<select
+							name='colorsId'
+							value={filters.colorsId}
 							onChange={handleFilterChange}
 							className='p-2 border rounded'
-						/>
+						>
+							<option value=''>Выберите цвет</option>
+							{colors.map((color) => (
+								<option key={color.id} value={color.id}>
+									{color.name}
+								</option>
+							))}
+						</select>
 
+						{/* Тип топлива */}
 						<select
 							name='fuelId'
 							value={filters.fuelId}
@@ -244,11 +197,15 @@ const CarList = () => {
 							className='p-2 border rounded'
 						>
 							<option value=''>Тип топлива</option>
-							<option value='1'>Бензин</option>
-							<option value='2'>Дизель</option>
-							<option value='3'>Электрический</option>
+							<option value='1'>Дизель</option>
+							<option value='2'>Электрический</option>
+							<option value='3'>Гибрид</option>
+							<option value='4'>Бензин</option>
+							<option value='5'>Газ</option>
+							<option value='6'>Водородный</option>
 						</select>
 
+						{/* Тип трансмиссии */}
 						<select
 							name='transmissionId'
 							value={filters.transmissionId}
@@ -260,40 +217,27 @@ const CarList = () => {
 							<option value='2'>Механическая</option>
 						</select>
 
-						<input
-							type='number'
-							name='mountOneId'
-							placeholder='Месяц от'
-							value={filters.mountOneId}
-							onChange={handleFilterChange}
-							className='p-2 border rounded'
-						/>
-						<input
-							type='number'
-							name='mountTwoId'
-							placeholder='Месяц до'
-							value={filters.mountTwoId}
-							onChange={handleFilterChange}
-							className='p-2 border rounded'
-						/>
-
+						{/* Год от */}
 						<input
 							type='number'
 							name='yearOneId'
-							placeholder='Год от'
+							placeholder='от 1950 и выше'
 							value={filters.yearOneId}
 							onChange={handleFilterChange}
 							className='p-2 border rounded'
 						/>
+
+						{/* Год до */}
 						<input
 							type='number'
 							name='yearTwoId'
-							placeholder='Год до'
+							placeholder={yearTwoPlaceholder}
 							value={filters.yearTwoId}
 							onChange={handleFilterChange}
 							className='p-2 border rounded'
 						/>
 
+						{/* Пробег от */}
 						<input
 							type='number'
 							name='mileageOneId'
@@ -302,6 +246,8 @@ const CarList = () => {
 							onChange={handleFilterChange}
 							className='p-2 border rounded'
 						/>
+
+						{/* Пробег до */}
 						<input
 							type='number'
 							name='mileageTwoId'
@@ -311,9 +257,18 @@ const CarList = () => {
 							className='p-2 border rounded'
 						/>
 
+						{/* Кнопка "Применить фильтры" */}
+						<button
+							onClick={applyFilters}
+							className='bg-red-500 text-white p-2 rounded hover:bg-red-600'
+						>
+							Применить фильтры
+						</button>
+
+						{/* Кнопка сброса фильтров */}
 						<button
 							onClick={resetFilters}
-							className='bg-red-500 text-white p-2 rounded hover:bg-red-600'
+							className='bg-red-500 text-white p-2 rounded hover:bg-red-600 mt-2'
 						>
 							Сбросить фильтры
 						</button>
@@ -329,7 +284,7 @@ const CarList = () => {
 						<CarListItem key={index} car={car} />
 					))}
 				</div>
-				{loading && <Loader />}
+				{loading && <p>Загрузка...</p>}
 				{!loading && cars.length === 0 && (
 					<p className='text-center text-gray-500'>
 						Нет подходящих автомобилей.
