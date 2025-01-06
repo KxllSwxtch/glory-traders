@@ -2,9 +2,21 @@ import httpx
 import logging
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+
 
 # Создание приложения FastAPI
 app = FastAPI()
+
+# CORS Middlware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +31,14 @@ HEADERS = {
     "Referer": "https://mike-auto.ru/korea",
 }
 
+# Подключаем папку frontend/dist как статические файлы
+app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="static")
+
+
+@app.get("/api")
+def read_root():
+    return {"message": "Hello from FastAPI"}
+
 
 # Эндпоинт для получения автомобилей с конкретной страницы
 @app.get("/api/proxy/filter/page")
@@ -27,7 +47,7 @@ async def get_cars_page(
     manufacturerId: int | None = None,
     modelId: int | None = None,
     generationId: int | None = None,
-    colorId: int | None = None,
+    colorsId: int | None = None,
     fuelId: int | None = None,
     transmissionId: int | None = None,
     mountOneId: int | None = None,
@@ -47,24 +67,24 @@ async def get_cars_page(
         params["modelId"] = modelId
     if generationId:
         params["generationId"] = generationId
-    if colorId:
-        params["colorId"] = colorId
+    if colorsId:
+        params["color"] = colorsId
     if fuelId:
-        params["fuelId"] = fuelId
+        params["fuel"] = fuelId
     if transmissionId:
-        params["transmissionId"] = transmissionId
+        params["transmission"] = transmissionId
     if mountOneId:
         params["mountOneId"] = mountOneId
     if mountTwoId:
         params["mountTwoId"] = mountTwoId
     if yearOneId:
-        params["yearOneId"] = yearOneId
+        params["yearOne"] = yearOneId
     if yearTwoId:
-        params["yearTwoId"] = yearTwoId
+        params["yearTwo"] = yearTwoId
     if mileageOneId:
-        params["mileageOneId"] = mileageOneId
+        params["mileageOne"] = mileageOneId
     if mileageTwoId:
-        params["mileageTwoId"] = mileageTwoId
+        params["mileageTwo"] = mileageTwoId
 
     try:
         async with httpx.AsyncClient() as client:
