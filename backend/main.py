@@ -2,8 +2,8 @@ import httpx
 import logging
 
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.staticfiles import StaticFiles
 
 
 # Создание приложения FastAPI
